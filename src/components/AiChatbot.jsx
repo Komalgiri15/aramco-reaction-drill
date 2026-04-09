@@ -432,25 +432,36 @@ function AiChatbot({ onComplete = () => {}, lang = 'en', fullPage = false }) {
               <div style={{ fontSize: '12px', color: '#666', marginBottom: '10px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '1px' }}>
                 {lang === 'en' ? "Select a Question" : "اختر سؤالاً"}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div 
+                className="chat-window-content" 
+                style={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '8px', 
+                  maxHeight: '150px', 
+                  overflowY: 'auto',
+                  paddingRight: '5px'
+                }}
+              >
                 {PREDEFINED_QUESTIONS.map((q, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSendPredefined(q)}
                     disabled={isLoading}
                     style={{
-                      padding: '12px 18px',
+                      padding: '8px 12px',
                       backgroundColor: 'white',
                       border: '1px solid #0F79B9',
-                      borderRadius: '8px',
+                      borderRadius: '6px',
                       color: '#0F79B9',
-                      fontSize: '13px',
+                      fontSize: '12px',
                       fontWeight: '600',
                       cursor: isLoading ? 'not-allowed' : 'pointer',
                       textAlign: lang === 'ar' ? 'right' : 'left',
                       transition: 'all 0.2s',
                       opacity: isLoading ? 0.5 : 1,
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                      flexShrink: 0
                     }}
                     onMouseEnter={e => { if(!isLoading) { e.currentTarget.style.backgroundColor = '#0F79B9'; e.currentTarget.style.color = 'white'; }}}
                     onMouseLeave={e => { if(!isLoading) { e.currentTarget.style.backgroundColor = 'white'; e.currentTarget.style.color = '#0F79B9'; }}}
