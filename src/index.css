@@ -237,24 +237,43 @@ body {
 
 .mission-status-stamp {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-15deg);
-  border: 4px solid #d94f3d;
-  color: #d94f3d;
-  padding: 5px 15px;
-  font-size: 24px;
+  top: 15px;
+  right: -5px;
+  background: var(--primary-color);
+  color: white;
+  padding: 6px 12px;
+  font-size: 10px;
   font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  opacity: 0.8;
-  z-index: 5;
+  letter-spacing: 1px;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0, 166, 81, 0.3);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   pointer-events: none;
-  background: rgba(255,255,255,0.8);
+  animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.mission-status-stamp::before {
+  content: '✓';
+  font-size: 12px;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.mission-card-wrapper.completed .mission-polaroid {
+  background-color: #E6F3FA; /* Very light Aramco Blue tint */
+  border-color: var(--secondary-color);
+  box-shadow: 0 10px 30px rgba(15, 121, 185, 0.1);
 }
 
 .mission-card-wrapper.completed .polaroid-image img {
-  filter: grayscale(0.5) contrast(0.8);
+  filter: grayscale(0.3) opacity(0.8);
 }
 
 .step-number {
@@ -774,4 +793,130 @@ p { margin-bottom: 15px; color: #555; }
   text-transform: uppercase;
   letter-spacing: 2px;
   font-weight: 700;
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS (Media Queries)
+   ========================================================================== */
+
+@media (max-width: 992px) {
+  .mission-map {
+    padding: 30px;
+    height: auto;
+    min-height: unset;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .mission-path {
+    display: none;
+  }
+
+  .mission-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    height: auto;
+  }
+
+  .mission-card-wrapper {
+    position: static !important;
+    transform: none !important;
+    width: 260px !important;
+  }
+
+  .app-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+    padding: 15px;
+  }
+
+  .header-title {
+    margin: 0;
+  }
+
+  .progress-container {
+    display: none; /* Hide vertical progress on mobile to save space */
+  }
+
+  .nav-tabs {
+    flex-wrap: wrap;
+  }
+
+  .nav-tab {
+    flex: 1 1 33%;
+    font-size: 10px;
+    padding: 12px 5px;
+  }
+
+  .nav-tab img {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .instruction-modal {
+    padding: 20px;
+    max-width: 95%;
+  }
+
+  .modal-title {
+    font-size: 24px;
+  }
+
+  .modal-pills-container {
+    flex-direction: column;
+  }
+
+  .main-content {
+    padding: 20px 10px;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .insight-journey {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .journey-line {
+    width: 2px;
+    height: 20px;
+    margin-top: 0;
+  }
+
+  .reaction-icon-btn {
+    padding: 15px 10px;
+  }
+
+  .roadmap-zig-zag-container {
+    padding: 20px 10px !important;
+  }
+
+  .timeline-spine {
+    left: 20px !important;
+  }
+
+  .timeline-node {
+    width: 100% !important;
+    padding-left: 50px !important;
+    padding-right: 0 !important;
+    text-align: left !important;
+    margin-bottom: 20px !important;
+  }
+
+  .node-marker {
+    left: 10px !important;
+    right: auto !important;
+  }
+
+  .node-step-info {
+    left: -45px !important;
+    right: auto !important;
+  }
 }

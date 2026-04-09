@@ -58,6 +58,16 @@ function AiChatbot({ onComplete = () => {}, lang = 'en', fullPage = false }) {
   const [summary, setSummary] = useState('');
   const messagesEndRef = useRef(null);
 
+  useEffect(() => {
+    const handleAriaHelp = (e) => {
+      const msg = e.detail;
+      setIsOpen(true);
+      setMessages(prev => [...prev, { role: 'assistant', content: msg }]);
+    };
+    window.addEventListener('aria-help', handleAriaHelp);
+    return () => window.removeEventListener('aria-help', handleAriaHelp);
+  }, []);
+
   const MAX_EXCHANGES = 8; 
 
   const scrollToBottom = () => {
@@ -278,10 +288,10 @@ function AiChatbot({ onComplete = () => {}, lang = 'en', fullPage = false }) {
       {isOpen && (
         <div className="card" style={{ 
           position: 'fixed',
-          bottom: '100px',
-          right: '30px',
-          width: '380px',
-          height: '600px',
+          bottom: 'min(100px, 15vh)',
+          right: 'min(30px, 5vw)',
+          width: 'min(400px, 90vw)',
+          height: 'min(700px, 80vh)',
           padding: 0, 
           display: 'flex', 
           flexDirection: 'column', 

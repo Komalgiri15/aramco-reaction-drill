@@ -243,6 +243,13 @@ function BehavioralQuiz({ onComplete, lang = 'en' }) {
     setShowDebrief(true);
     if (id === question.correct) {
       setScore(s => s + 1);
+    } else {
+      // Trigger chatbot help
+      const helpMsg = lang === 'en' 
+        ? `I noticed that was a tricky one! "${question.question.substring(0, 40)}..." remember that our goal is to shift from reactive protection to cognitive agility. Let me help you understand why.`
+        : `لقد لاحظت أن هذا السؤال كان صعباً! تذكر أن هدفنا هو التحول من الحماية التفاعلية إلى الرشاقة المعرفية. دعني أساعدك في فهم السبب.`;
+      
+      window.dispatchEvent(new CustomEvent('aria-help', { detail: helpMsg }));
     }
   };
 
