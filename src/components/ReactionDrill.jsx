@@ -1,276 +1,385 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaPlay, FaBrain, FaBolt, FaShieldAlt } from 'react-icons/fa';
+import { FaPlay, FaBrain, FaBolt, FaShieldAlt, FaVolumeMute, FaCommentDots, FaQuestionCircle, FaCheckCircle, FaExclamationCircle, FaInbox } from 'react-icons/fa';
 
 const STATEMENTS_EN = [
-  "Your report had several errors.",
-  "I think someone else should lead this.",
-  "You didn't meet the deadline again.",
-  "Your communication style can be off-putting.",
-  "This work is below the standard we expect.",
-  "I got feedback from the team about your attitude."
+  "You interrupt people in meetings.",
+  "Your tone sounds harsh sometimes.",
+  "You don't keep others updated.",
+  "You rush through tasks.",
+  "You don't listen fully."
 ];
 
 const STATEMENTS_AR = [
-  "كان هناك عدة أخطاء في تقريرك.",
-  "أعتقد أن شخصًا آخر يجب أن يقود هذا.",
-  "لم تلتزم بالموعد النهائي مرة أخرى.",
-  "أسلوب تواصلك يمكن أن يكون منفراً.",
-  "هذا العمل أقل من المستوى الذي نتوقعه.",
-  "تلقيت ملاحظات من الفريق حول موقفك."
+  "أنت تقاطع الناس في الاجتماعات.",
+  "نبرة صوتك تبدو قاسية أحياناً.",
+  "أنت لا تبقي الآخرين على اطلاع.",
+  "أنت تتسرع في إنجاز المهام.",
+  "أنت لا تستمع بالكامل."
 ];
 
 const PHASE_START = 0;
-const PHASE_PULSE = 1;
-const PHASE_FLASH = 2;
-const PHASE_REACTION = 3;
-const PHASE_SPEED_SCORE = 4;
-const PHASE_REWIRE = 5;
-const PHASE_EXPLANATION = 6;
-const PHASE_RESULTS = 7;
+const PHASE_FLASH = 1;
+const PHASE_REACTION = 2;
+const PHASE_QUICK_FEEDBACK = 3;
+const PHASE_ANALYZING = 4;
+const PHASE_RESULTS = 5;
 
 function ReactionDrill({ onComplete, lang = 'en' }) {
   const [phase, setPhase] = useState(PHASE_START);
   const [round, setRound] = useState(0);
-  const [statementIdx, setStatementIdx] = useState(0);
+  const [history, setHistory] = useState([]);
   
   const [reactionStartTime, setReactionStartTime] = useState(0);
-  const [reactionTime, setReactionTime] = useState(0);
-  const [instinctiveCounts, setInstinctiveCounts] = useState({ defend: 0, shutdown: 0, panic: 0, reflect: 0 });
-  const [rewireScore, setRewireScore] = useState(0);
-  const [currentExplanation, setCurrentExplanation] = useState('');
+  const [lastTime, setLastTime] = useState(0);
+  const [lastPattern, setLastPattern] = useState(null);
 
-  const TOTAL_ROUNDS = 4;
-
+  const TOTAL_ROUNDS = STATEMENTS_EN.length;
   const STATEMENTS = lang === 'ar' ? STATEMENTS_AR : STATEMENTS_EN;
 
-  useEffect(() => {
-    if (phase === PHASE_PULSE) {
-      setStatementIdx(Math.floor(Math.random() * STATEMENTS.length));
-      const timer = setTimeout(() => setPhase(PHASE_FLASH), 1500);
-      return () => clearTimeout(timer);
+  const handleStart = () => {
+    setRound(0);
+    setHistory([]);
+    triggerNextRound(0);
+  };
+
+  const triggerNextRound = (currentRound) => {
+    if (currentRound >= TOTAL_ROUNDS) {
+      setPhase(PHASE_ANALYZING);
+      // Simulate AI analysis for 3 seconds
+      setTimeout(() => {
+        setPhase(PHASE_RESULTS);
+      }, 3000);
+      return;
     }
+    setPhase(PHASE_FLASH);
+    // Increased to 2 seconds per user request
+    setTimeout(() => {
+      setPhase(PHASE_REACTION);
+      setReactionStartTime(Date.now());
+    }, 2000);
+  };
+
+  const handleReaction = (pattern) => {
+    const time = (Date.now() - reactionStartTime) / 1000;
+    setLastTime(time);
+    setLastPattern(pattern);
+    setHistory(prev => [...prev, { pattern, time }]);
     
-    if (phase === PHASE_FLASH) {
-      document.body.style.backgroundColor = '#2c0b0b';
-      const timer = setTimeout(() => {
-        setPhase(PHASE_REACTION);
-        setReactionStartTime(Date.now());
-      }, 1200);
-      return () => {
-        clearTimeout(timer);
-        document.body.style.backgroundColor = 'var(--bg-light)';
-      };
+    setPhase(PHASE_QUICK_FEEDBACK);
+    
+    // Auto advance after short feedback pulse
+    setTimeout(() => {
+      const nextR = round + 1;
+      setRound(nextR);
+      triggerNextRound(nextR);
+    }, 1200);
+  };
+
+  const getPatternIcon = (p) => {
+    if (p === 'defend') return <FaShieldAlt />;
+    if (p === 'justify') return <FaQuestionCircle />;
+    if (p === 'silent') return <FaVolumeMute />;
+    if (p === 'explain') return <FaCommentDots />;
+    return <FaBolt />;
+  };
+
+  const getPatternLabel = (p) => {
+    if (lang === 'ar') {
+      if (p === 'defend') return "دفاع";
+      if (p === 'justify') return "تبرير";
+      if (p === 'silent') return "صمت";
+      if (p === 'explain') return "شرح";
     }
-  }, [phase, STATEMENTS.length]);
-
-  const handleStartRound = () => {
-    if (round >= TOTAL_ROUNDS) {
-      setPhase(PHASE_RESULTS);
-      onComplete();
-    } else {
-      setPhase(PHASE_PULSE);
-    }
+    return p.toUpperCase();
   };
-
-  const handleInstinctiveReaction = (type) => {
-    const timeTaken = (Date.now() - reactionStartTime) / 1000;
-    setReactionTime(timeTaken);
-    setInstinctiveCounts(prev => ({ ...prev, [type]: prev[type] + 1 }));
-    setPhase(PHASE_SPEED_SCORE);
-  };
-
-  const handleRewireChoice = (choice, points, explanation) => {
-    setRewireScore(prev => prev + points);
-    setCurrentExplanation(explanation);
-    setPhase(PHASE_EXPLANATION);
-  };
-
-  const nextRound = () => {
-    setRound(r => r + 1);
-    setPhase(PHASE_START);
-  };
-
-  let maxCount = -1;
-  let patternLabelEn = "";
-  let patternLabelAr = "";
-  for (const [key, val] of Object.entries(instinctiveCounts)) {
-    if (val > maxCount) {
-      maxCount = val;
-      if (key === 'defend') { patternLabelEn = "Ego Shield Mode"; patternLabelAr = "وضع درع الأنا"; }
-      if (key === 'shutdown') { patternLabelEn = "Withdrawal Mode"; patternLabelAr = "وضع الانسحاب"; }
-      if (key === 'panic') { patternLabelEn = "Threat Overdrive"; patternLabelAr = "تجاوز التهديد"; }
-      if (key === 'reflect') { patternLabelEn = "Feedback Intelligence Active"; patternLabelAr = "ذكاء الملاحظات نشط"; }
-    }
-  }
-  const patternLabel = lang === 'en' ? patternLabelEn : patternLabelAr;
-
-  let badge = "";
-  if (rewireScore <= 40) badge = lang === 'en' ? "🥉 Reactive Reflex" : "🥉 انعكاس تفاعلي";
-  else if (rewireScore <= 70) badge = lang === 'en' ? "🥈 Aware Processor" : "🥈 معالج واعي";
-  else badge = lang === 'en' ? "🥇 Feedback Agile" : "🥇 رشيق الملاحظات";
 
   return (
-    <div className="card text-center" style={{ minHeight: '450px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <div className="card text-center" style={{ minHeight: '520px', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
       
       {phase === PHASE_START && (
-        <div className="text-fade-in" style={{ padding: '20px 0' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px', color: 'var(--accent-color)' }}>
-            <FaBrain style={{ fontSize: '48px', filter: 'drop-shadow(0 0 10px rgba(200,160,74,0.5))' }} />
-          </div>
-          <h2 style={{ color: 'var(--primary-color)', fontSize: '32px', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '2px', textShadow: 'var(--glow-primary)' }}>
-            {lang === 'en' ? "THE TRIGGER FLASH" : "وميض المحفز"}
+        <div className="text-fade-in">
+          <FaBrain style={{ fontSize: '64px', color: 'var(--accent-color)', marginBottom: '20px' }} />
+          <h2 style={{ color: 'var(--primary-color)', fontSize: '28px', fontWeight: '800' }}>
+            {lang === 'en' ? "RAPID REACTION DRILL" : "تدريب رد الفعل السريع"}
           </h2>
-          <p className="mb-2" style={{ maxWidth: '500px', margin: '0 auto 30px', fontSize: '15px', color: '#ccc' }}>
-            {lang === 'en' ? "Simulate the speed at which we emotionally react to feedback before our rational brain can process it." : "محاكاة السرعة التي نتفاعل بها عاطفياً مع الملاحظات قبل أن يتمكن دماغنا العقلاني من معالجتها."}
+          <p style={{ maxWidth: '450px', margin: '15px auto 30px', color: '#666', fontSize: '14px' }}>
+            {lang === 'en' 
+              ? "Five harsh statements will flash. React instantly using the icons. No thinking allowed." 
+              : "ستظهر خمس عبارات قاسية. تفاعل فوراً باستخدام الأيقونات. لا يسمح بالتفكير."}
           </p>
-          
-          <div className="mb-3" style={{ display: 'flex', justifyContent: 'center', position: 'relative', height: '150px', alignItems: 'center' }}>
-            <div className="radar-sweep" style={{ position: 'absolute', width: '120px', height: '120px', borderRadius: '50%', background: 'conic-gradient(from 0deg, transparent 70%, rgba(0, 166, 81, 0.4) 100%)', border: '2px solid rgba(0, 166, 81, 0.2)' }}></div>
-            <div style={{ position: 'absolute', width: '80px', height: '80px', borderRadius: '50%', border: '1px solid rgba(200, 160, 74, 0.3)' }}></div>
-            <div style={{ position: 'absolute', width: '40px', height: '40px', borderRadius: '50%', border: '1px solid rgba(200, 160, 74, 0.5)' }}></div>
-            <FaBolt style={{ position: 'absolute', fontSize: '24px', color: 'var(--warning-color)', filter: 'drop-shadow(0 0 10px rgba(217, 79, 61, 0.8))' }} />
-          </div>
-
-          <button className="btn btn-accent" onClick={handleStartRound} style={{ padding: '20px 40px', fontSize: '18px', borderRadius: '30px', margin: '20px 0' }}>
-            {round === 0 
-              ? <><FaPlay /> {lang === 'en' ? "INITIATE DRILL" : "تفعيل التدريب"}</>
-              : <><FaPlay /> {lang === 'en' ? `START ROUND ${round + 1} OF ${TOTAL_ROUNDS}` : `ابدأ الجولة ${round + 1} من ${TOTAL_ROUNDS}`}</>}
+          <button className="btn btn-accent" onClick={handleStart} style={{ padding: '15px 50px', fontSize: '18px', borderRadius: '40px' }}>
+            {lang === 'en' ? "START RAPID FIRE" : "بدء الوميض السريع"}
           </button>
-        </div>
-      )}
-
-      {phase === PHASE_PULSE && (
-        <div style={{ animation: 'pulse 1s infinite' }}>
-          <h3>{lang === 'en' ? "Get Ready..." : "استعد..."}</h3>
-          <p>{lang === 'en' ? "Read the statement that flashes next." : "اقرأ العبارة التي ستومض تالياً."}</p>
         </div>
       )}
 
       {phase === PHASE_FLASH && (
-        <div style={{ backgroundColor: 'var(--bg-dark)', padding: '50px', borderRadius: '8px', border: '5px solid var(--warning-color)' }}>
-          <h2 style={{ color: 'white', fontSize: '24px', letterSpacing: '1px' }}>"{STATEMENTS[statementIdx]}"</h2>
+        <div className="text-fade-in" style={{ padding: '40px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--accent-color)', fontWeight: '800', letterSpacing: '2px', marginBottom: '20px' }}>
+                ROUND {round + 1} / {TOTAL_ROUNDS}
+            </div>
+            <h1 style={{ fontSize: '32px', color: 'var(--primary-color)', fontWeight: '900', lineHeight: '1.2' }}>
+                "{STATEMENTS[round]}"
+            </h1>
         </div>
       )}
 
       {phase === PHASE_REACTION && (
-        <div>
-          <h3 className="mb-2" style={{ color: 'var(--warning-color)' }}>{lang === 'en' ? "WHAT IS YOUR FIRST INSTINCT?" : "ما هي غريزتك الأولى؟"}</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', maxWidth: '500px', margin: '0 auto' }}>
-            <button className="btn btn-secondary" onClick={() => handleInstinctiveReaction('defend')}>{lang === 'en' ? "😤 Defend" : "😤 الدفاع"}</button>
-            <button className="btn btn-secondary" onClick={() => handleInstinctiveReaction('shutdown')}>{lang === 'en' ? "😶 Shut Down" : "😶 الانغلاق"}</button>
-            <button className="btn btn-secondary" onClick={() => handleInstinctiveReaction('panic')}>{lang === 'en' ? "😰 Panic" : "😰 الذعر"}</button>
-            <button className="btn btn-secondary" onClick={() => handleInstinctiveReaction('reflect')}>{lang === 'en' ? "🤔 Reflect" : "🤔 التأمل"}</button>
-          </div>
-        </div>
-      )}
-
-      {phase === PHASE_SPEED_SCORE && (
-        <div>
-          <h2 style={{ color: 'var(--primary-color)' }}>{lang === 'en' ? "SPEED SCORE" : "درجة السرعة"}</h2>
-          <h1 style={{ fontSize: '48px', color: 'var(--warning-color)', margin: '20px 0' }}>{reactionTime.toFixed(2)}s</h1>
-          <p className="mb-2">
-            {lang === 'en' ? 
-              <>Your brain reacted in <strong>{reactionTime.toFixed(2)} seconds</strong> &mdash; before your prefrontal cortex could fully process this.</> : 
-              <>استجاب دماغك في <strong>{reactionTime.toFixed(2)} ثانية</strong> &mdash; قبل أن تتمكن قشرتك الجبهية من معالجة هذا بالكامل.</>}
+        <div className="text-fade-in">
+          <p style={{ fontSize: '12px', fontWeight: '800', color: 'var(--warning-color)', marginBottom: '30px', letterSpacing: '1px' }}>
+            {lang === 'en' ? "SELECT INSTINCTIVE RESPONSE" : "اختر الاستجابة الغريزية"}
           </p>
-          <div className="mb-3" style={{ padding: '15px', background: 'rgba(217, 79, 61, 0.1)', borderRadius: '8px', display: 'inline-block' }}>
-            <span style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-dark)' }}>{lang === 'en' ? "Reaction Pattern" : "نمط رد الفعل"}:</span><br/>
-            <strong style={{ fontSize: '18px', color: 'var(--warning-color)' }}>{patternLabel}</strong>
-          </div>
-          <div>
-            <button className="btn" onClick={() => setPhase(PHASE_REWIRE)}>{lang === 'en' ? "Go to Re-wire Phase" : "انتقل إلى مرحلة إعادة البرمجة"}</button>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', maxWidth: '400px', margin: '0 auto' }}>
+            <button className="reaction-icon-btn" onClick={() => handleReaction('defend')}>
+                <FaShieldAlt />
+                <span>{lang === 'en' ? "DEFEND" : "دفاع"}</span>
+            </button>
+            <button className="reaction-icon-btn" onClick={() => handleReaction('justify')}>
+                <FaQuestionCircle />
+                <span>{lang === 'en' ? "JUSTIFY" : "تبرير"}</span>
+            </button>
+            <button className="reaction-icon-btn" onClick={() => handleReaction('silent')}>
+                <FaVolumeMute />
+                <span>{lang === 'en' ? "SILENT" : "صمت"}</span>
+            </button>
+            <button className="reaction-icon-btn" onClick={() => handleReaction('explain')}>
+                <FaCommentDots />
+                <span>{lang === 'en' ? "EXPLAIN" : "شرح"}</span>
+            </button>
           </div>
         </div>
       )}
 
-      {phase === PHASE_REWIRE && (
-        <div>
-           <div className="card-header-gradient" style={{ margin: '-30px -30px 20px -30px', padding: '20px' }}>
-             <h3>{lang === 'en' ? "REWIRE THE REACTION" : "إعادة برمجة رد الفعل"}</h3>
-             <p style={{ fontSize: '14px', margin: 0, opacity: 0.9 }}>{lang === 'en' ? "You have 5 full seconds. Let your prefrontal cortex take over." : "لديك 5 ثوان كاملة. دع قشرتك الجبهية تتولى الأمر."}</p>
-           </div>
-           
-           <div style={{ padding: '30px', backgroundColor: 'var(--bg-light)', borderRadius: '8px', marginBottom: '20px', borderLeft: lang === 'en' ? '4px solid var(--secondary-color)' : 'none', borderRight: lang === 'ar' ? '4px solid var(--secondary-color)' : 'none' }}>
-              <h3 style={{ margin: 0, fontSize: '20px' }}>"{STATEMENTS[statementIdx]}"</h3>
-           </div>
-
-           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '600px', margin: '0 auto' }}>
-             <button className="btn btn-secondary" style={{ justifyContent: 'flex-start', textAlign: lang === 'ar' ? 'right' : 'left' }}
-               onClick={() => handleRewireChoice('ask', 25, lang === 'en' ? "Asking a clarifying question shifts your brain from threat detection to curiosity, reducing amygdala activation." : "طرح سؤال توضيحي يحول دماغك من اكتشاف التهديدات إلى الفضول، مما يقلل من تنشيط اللوزة الدماغية.")}>
-               {lang === 'en' ? "Ask a clarifying question" : "اطرح سؤالا توضيحيا"}
-             </button>
-             <button className="btn btn-secondary" style={{ justifyContent: 'flex-start', textAlign: lang === 'ar' ? 'right' : 'left' }}
-               onClick={() => handleRewireChoice('breathe', 25, lang === 'en' ? "Deep breathing directly signals the vagus nerve to calm the nervous system and lower cortisol." : "التنفس العميق يشير مباشرة إلى العصب المبهم لتهدئة الجهاز العصبي وخفض الكورتيزول.")}>
-               {lang === 'en' ? "Breathe and acknowledge" : "تأمل واعترف"}
-             </button>
-             <button className="btn btn-secondary" style={{ justifyContent: 'flex-start', textAlign: lang === 'ar' ? 'right' : 'left' }}
-               onClick={() => handleRewireChoice('separate', 25, lang === 'en' ? "Separating behaviour from identity prevents the feedback from being registered as a social survival threat." : "فصل السلوك عن الهوية يمنع من تفسير الملاحظات كتهديد للبقاء الاجتماعي.")}>
-               {lang === 'en' ? "Separate behaviour from identity" : "افصل السلوك عن الهوية"}
-             </button>
-             <button className="btn btn-secondary" style={{ justifyContent: 'flex-start', textAlign: lang === 'ar' ? 'right' : 'left' }}
-               onClick={() => handleRewireChoice('thank', 25, lang === 'en' ? "Thanking them acknowledges the gift of feedback, overriding defensive barriers and establishing psychological safety." : "شكرهم يعترف بهدية الملاحظات، متجاوزاً حواجز الدفاع ومؤسساً للأمان النفسي.")}>
-               {lang === 'en' ? "Thank them and reflect later" : "اشكرهم وتأمل لاحقا"}
-             </button>
-           </div>
+      {phase === PHASE_QUICK_FEEDBACK && (
+        <div className="text-fade-in">
+            <div style={{ fontSize: '60px', color: 'var(--secondary-color)', marginBottom: '10px' }}>
+                {getPatternIcon(lastPattern)}
+            </div>
+            <h2 style={{ color: 'var(--primary-color)', margin: '0' }}>{lastTime.toFixed(2)}s</h2>
+            <p style={{ fontSize: '14px', color: '#888', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                {getPatternLabel(lastPattern)}
+            </p>
         </div>
       )}
 
-      {phase === PHASE_EXPLANATION && (
-        <div>
-          <h3 style={{ color: 'var(--secondary-color)' }}>🧠 {lang === 'en' ? "Neuroscience Insight" : "رؤية علم الأعصاب"}</h3>
-          <p style={{ fontSize: '18px', margin: '20px auto', maxWidth: '600px', lineHeight: '1.5' }}>
-            {currentExplanation}
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '20px 0' }}>
-            <svg width="60" height="60" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="45" fill="none" stroke="var(--secondary-color)" strokeWidth="3" />
-              <path d="M30 50 L45 65 L70 35" fill="none" stroke="var(--secondary-color)" strokeWidth="5" />
-            </svg>
-          </div>
-          <button className="btn" onClick={nextRound}>
-            {round + 1 >= TOTAL_ROUNDS ? (lang === 'en' ? "SEE FINAL RESULTS" : "رؤية النتائج النهائية") : (lang === 'en' ? "NEXT ROUND" : "الجولة التالية")}
-          </button>
+      {phase === PHASE_ANALYZING && (
+        <div className="text-fade-in">
+           <div className="ai-scanner">
+              <FaBrain className="scanning-icon" style={{ color: 'var(--accent-color)' }} />
+              <div className="scan-line"></div>
+           </div>
+           <h3 style={{ color: 'var(--primary-color)', letterSpacing: '2px', fontWeight: '800' }}>
+              {lang === 'en' ? "AI ANALYZING DATA..." : "الذكاء الاصطناعي يحلل البيانات..."}
+           </h3>
+           <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '20px' }}>
+              <FaBolt className="pulse-icon" style={{ color: 'var(--warning-color)' }} />
+              <FaCheckCircle className="pulse-icon" style={{ color: 'var(--secondary-color)', animationDelay: '0.2s' }} />
+              <FaExclamationCircle className="pulse-icon" style={{ color: 'var(--accent-color)', animationDelay: '0.4s' }} />
+           </div>
         </div>
       )}
 
       {phase === PHASE_RESULTS && (
-        <div>
-          <div className="card-header-gradient" style={{ margin: '-30px -30px 20px -30px', padding: '30px' }}>
-            <h2 style={{ fontSize: '28px', margin: 0 }}>{lang === 'en' ? "TRAINING COMPLETE" : "اكتمل التدريب"}</h2>
-          </div>
-          <p>{lang === 'en' ? "Your Reflection Score:" : "درجة التأمل الخاصة بك:"} <strong>{rewireScore} / 100</strong></p>
+        <div className="text-fade-in results-view">
+          <h2 style={{ color: 'var(--primary-color)', fontWeight: '800', marginBottom: '30px' }}>{lang === 'en' ? "DRILL SUMMARY" : "ملخص التدريب"}</h2>
           
-          <div style={{ 
-            backgroundColor: 'var(--bg-dark)', 
-            color: 'white', 
-            padding: '30px', 
-            borderRadius: '8px', 
-            margin: '20px auto',
-            maxWidth: '400px'
-          }}>
-            <p style={{ fontSize: '12px', textTransform: 'uppercase', letterSpacing: '2px', opacity: 0.7, margin: 0 }}>{lang === 'en' ? "Final Badge" : "الشارة النهائية"}</p>
-            <h2 style={{ color: 'var(--accent-color)', fontSize: '32px', margin: '10px 0 0 0' }}>{badge}</h2>
+          <div className="insight-journey">
+            <div className="journey-step">
+               <div className="step-icon">
+                  <FaInbox style={{ color: 'var(--secondary-color)' }} />
+               </div>
+               <div className="step-text">
+                  <strong>{lang === 'en' ? "INPUT" : "مدخل"}</strong>
+                  <p>{lang === 'en' ? "Feedback comes in" : "الملاحظات تدخل"}</p>
+               </div>
+            </div>
+            <div className="journey-line"></div>
+            <div className="journey-step">
+               <div className="step-icon flash">
+                  <FaBolt style={{ color: 'var(--warning-color)' }} />
+               </div>
+               <div className="step-text">
+                  <strong>{lang === 'en' ? "IMPULSE" : "اندفاع"}</strong>
+                  <p>{lang === 'en' ? "Reaction comes out" : "رد الفعل يخرج"}</p>
+               </div>
+            </div>
+            <div className="journey-line"></div>
+            <div className="journey-step">
+               <div className="step-icon brain-glow">
+                  <FaBrain style={{ color: 'var(--accent-color)' }} />
+               </div>
+               <div className="step-text">
+                  <strong>{lang === 'en' ? "INSIGHT" : "بصيرة"}</strong>
+                  <p>{lang === 'en' ? "Thinking comes later" : "التفكير يأتي لاحقاً"}</p>
+               </div>
+            </div>
           </div>
-          
-          <p className="mb-3" style={{ maxWidth: '600px', margin: '0 auto 30px' }}>
-            {lang === 'en' ? "Dominant Instinctive Pattern tracked mostly as:" : "نمط الغريزة المهيمن متتبع في الغالب كـ:"} <strong style={{color: 'var(--warning-color)'}}>{patternLabel}</strong>.<br/>
-            {lang === 'en' ? "Remember, your initial physical reaction is biological and automatic. Excellence comes from how quickly you can engage your prefrontal cortex to process the feedback constructively!" : "تذكر، رد فعلك الجسدي الأولي بيولوجي وتلقائي. التميز يأتي من مدى سرعتك في إشراك قشرتك الجبهية لمعالجة الملاحظات بشكل بناء!"}
-          </p>
 
-          <button className="btn btn-accent" onClick={() => {
-            setRound(0);
-            setRewireScore(0);
-            setInstinctiveCounts({ defend: 0, shutdown: 0, panic: 0, reflect: 0 });
-            setPhase(PHASE_START);
-          }}>{lang === 'en' ? "Practice Again" : "تدرب مرة أخرى"}</button>
+          <div style={{ marginTop: '40px' }}>
+            <button className="btn btn-accent" onClick={() => setPhase(PHASE_START)} style={{ borderRadius: '30px' }}>
+              {lang === 'en' ? "RETRY DRILL" : "إعادة المحاولة"}
+            </button>
+            <button className="btn" onClick={onComplete} style={{ marginLeft: '10px', borderRadius: '30px', background: '#333', color: 'white' }}>
+              {lang === 'en' ? "FINISH MODULE" : "إنهاء الوحدة"}
+            </button>
+          </div>
         </div>
       )}
 
       <style dangerouslySetInnerHTML={{__html: `
-        @keyframes pulse {
-          0% { transform: scale(0.95); opacity: 0.5; }
-          50% { transform: scale(1); opacity: 1; }
-          100% { transform: scale(0.95); opacity: 0.5; }
+        .reaction-icon-btn {
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 20px;
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #444;
+        }
+        .reaction-icon-btn svg {
+            font-size: 32px;
+            color: var(--primary-color);
+        }
+        .reaction-icon-btn span {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        .reaction-icon-btn:hover {
+            border-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            background: rgba(0, 166, 81, 0.02);
+        }
+        .reaction-icon-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Insight Journey Timeline */
+        .insight-journey {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 15px;
+            margin: 40px 0;
+            padding: 20px;
+        }
+        .journey-step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            max-width: 140px;
+        }
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            background: #f8f8f8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 2px solid #eee;
+            transition: all 0.3s;
+        }
+        .step-text strong {
+            display: block;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+        .step-text p {
+            font-size: 13px;
+            line-height: 1.2;
+            color: #666;
+            margin: 0;
+            font-weight: 700;
+        }
+        .journey-line {
+            width: 30px;
+            height: 2px;
+            background: #eee;
+            margin-top: 30px;
+        }
+
+        /* Animations */
+        .flash {
+            animation: flash-pulse 2s infinite;
+            background: rgba(217, 79, 61, 0.1);
+            border-color: var(--warning-color);
+        }
+        .brain-glow {
+            animation: brain-pulse 2s infinite;
+            background: rgba(200, 160, 74, 0.1);
+            border-color: var(--accent-color);
+        }
+
+        @keyframes flash-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217, 79, 61, 0.4); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px 0 rgba(217, 79, 61, 0.2); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217, 79, 61, 0); }
+        }
+        @keyframes brain-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(200, 160, 74, 0.4); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px 0 rgba(200, 160, 74, 0.2); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(200, 160, 74, 0); }
+        }
+
+        /* AI Scanner Effects */
+        .ai-scanner {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #eee;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #fdfdfd;
+        }
+        .scanning-icon {
+            font-size: 60px;
+            animation: scanner-pulse 2s infinite ease-in-out;
+        }
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+            animation: scan-move 2s infinite linear;
+            z-index: 2;
+        }
+        .pulse-icon {
+            font-size: 24px;
+            animation: icon-pop 1.5s infinite ease-in-out;
+        }
+
+        @keyframes scan-move {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+        @keyframes scanner-pulse {
+            0% { opacity: 0.5; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0.5; transform: scale(0.9); }
+        }
+        @keyframes icon-pop {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.3); opacity: 1; }
         }
       `}} />
     </div>

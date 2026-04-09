@@ -4,8 +4,12 @@ import ReactionDrill from './components/ReactionDrill';
 import ReflectionWorksheet from './components/ReflectionWorksheet';
 import BehavioralQuiz from './components/BehavioralQuiz';
 import AiChatbot from './components/AiChatbot';
-import { FaGamepad, FaClipboardList, FaBrain, FaRegCheckCircle } from 'react-icons/fa';
+import { FaGamepad, FaClipboardList, FaBrain, FaRegCheckCircle, FaHandPointer } from 'react-icons/fa';
 import initialVideo from './assets/video.mp4';
+
+import card1Gif from './assets/card1.gif';
+import card2Gif from './assets/Card2.gif';
+import card3Gif from './assets/card3.gif';
 
 function App() {
   const [appPhase, setAppPhase] = useState('video'); // 'video', 'dashboard', 'module'
@@ -18,9 +22,24 @@ function App() {
   }, [lang]);
 
   const tabs = [
-    { title: lang === 'en' ? "REACTION DRILL" : "تدريب رد الفعل", icon: FaGamepad, component: ReactionDrill, desc: lang === 'en' ? "Test your emotional reflexes to tough feedback." : "اختبر ردود أفعالك العاطفية تجاه الملاحظات الصعبة." },
-    { title: lang === 'en' ? "REFLECTION WORKSHEET" : "ورقة التأمل", icon: FaClipboardList, component: ReflectionWorksheet, desc: lang === 'en' ? "Analyze and restructure your defensive habits." : "قم بتحليل وإعادة هيكلة عاداتك الدفاعية." },
-    { title: lang === 'en' ? "BEHAVIORAL MCQ QUIZ" : "اختبار متعدد الخيارات", icon: FaBrain, component: BehavioralQuiz, desc: lang === 'en' ? "Assess your feedback neuroscience knowledge." : "قم بتقييم معرفتك بعلم أعصاب الملاحظات." }
+    { 
+      title: lang === 'en' ? "REACTION SPEED DRILL" : "تدريب سرعة رد الفعل", 
+      imageUrl: card1Gif, 
+      component: ReactionDrill, 
+      desc: lang === 'en' ? "Testing your instinctive biological reflex." : "اختبار رد الفعل البيولوجي الغريزي." 
+    },
+    { 
+      title: lang === 'en' ? "COGNITIVE ASSESSMENT" : "التقييم المعرفي", 
+      imageUrl: card2Gif, 
+      component: BehavioralQuiz, 
+      desc: lang === 'en' ? "Measuring your feedback intelligence." : "قياس ذكاء ردود الفعل." 
+    },
+    {
+      title: lang === 'en' ? "BEHAVIORAL REWIRE" : "إعادة البرمجة السلوكية",
+      imageUrl: card3Gif,
+      component: ReflectionWorksheet,
+      desc: lang === 'en' ? "Reframing the internal reaction chain." : "إعادة صياغة سلسلة رد الفعل الداخلية."
+    }
   ];
 
   const handleModuleComplete = (index) => {
@@ -29,19 +48,47 @@ function App() {
     setCompletedModules(updated);
   };
 
-  const startModule = (index) => {
+  const [pendingModuleIndex, setPendingModuleIndex] = useState(null);
+
+  const instructions = [
+    {
+      label: lang === 'en' ? "BIOLOGICAL REFLEX" : "رد الفعل البيولوجي",
+      title: lang === 'en' ? "Mission 01: Reaction Speed Drill" : "المهمة ٠١: تدريب سرعة رد الفعل",
+      subtitle: lang === 'en' ? "Feedback comes in. Reaction comes out. Thinking comes later. React instantly—no thinking allowed." : "الملاحظات تدخل، رد الفعل يخرج، والتفكير يأتي لاحقاً. تفاعل فوراً - لا يسمح بالتفكير.",
+      pills: lang === 'en' ? ["RAPID FIRE", "NO FILTER", "AUTOMATIC"] : ["إطلاق سريع", "بدون تصفية", "تلقائي"]
+    },
+    { 
+      label: lang === 'en' ? "COGNITIVE MAPPING" : "رسم الخرائط المعرفية",
+      title: lang === 'en' ? "Mission 02: Intelligence Check" : "المهمة ٠٢: فحص الذكاء",
+      subtitle: lang === 'en' ? "Test your knowledge of the brain's reaction patterns and feedback neuroscience." : "اختبر معلوماتك حول أنماط ردود فعل الدماغ وعلم الأعصاب للملاحظات.",
+      pills: lang === 'en' ? ["10 QUESTIONS", "BRAIN SCIENCE", "IQ CHECK"] : ["١٠ أسئلة", "علوم الدماغ", "فحص الذكاء"]
+    },
+    {
+      label: lang === 'en' ? "BEHAVIORAL REWIRE" : "إعادة البرمجة السلوكية",
+      title: lang === 'en' ? "Mission 03: The Reframe" : "المهمة ٠٣: إعادة الصياغة",
+      subtitle: lang === 'en' ? "Feedback triggers emotion. Emotion drives thinking. Thinking drives reaction. Let's slow down and reflect." : "الملاحظات تثير العاطفة، العاطفة تحرك التفكير، والتفكير يوجه رد الفعل. دعونا نبطئ ونتأمل.",
+      pills: lang === 'en' ? ["DEEP REFLECTION", "ROADMAP", "COMMITMENT"] : ["تأمل عميق", "خارطة طريق", "التزام"]
+    }
+  ];
+
+  const startModulePress = (index) => {
+    setPendingModuleIndex(index);
+  };
+
+  const confirmStartModule = (index) => {
     setActiveTab(index);
     setAppPhase('module');
+    setPendingModuleIndex(null);
   };
 
   if (appPhase === 'video') {
     return (
       <div className="fullscreen-video-container">
-        <video 
-          src={initialVideo} 
-          autoPlay 
-          muted 
-          playsInline 
+        <video
+          src={initialVideo}
+          autoPlay
+          muted
+          playsInline
           onEnded={() => setAppPhase('dashboard')}
         />
         <button className="skip-btn" onClick={() => setAppPhase('dashboard')}>
@@ -61,29 +108,30 @@ function App() {
       <header className="app-header">
         <div className="logo-area" style={{ cursor: 'pointer' }} onClick={() => setAppPhase('dashboard')}>
           <div className="logo-arca">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 22H22L12 2Z" fill="var(--primary-color)"/>
-              <path d="M12 8L7 18H17L12 8Z" fill="white"/>
-            </svg>
-            ARAMCO
+            <img src="/src/assets/aramco-1.svg" alt="Aramco" style={{ height: '35px', marginRight: '10px' }} />
           </div>
           <div className="logo-subtitle">ARAMCO INDIA | LEARNING & DEVELOPMENT</div>
         </div>
         <div className="header-title">
-          {lang === 'en' ? "REACTION SPEED DRILL" : "تدريب سرعة رد الفعل"}
+          <div style={{ fontSize: '20px', fontWeight: '800' }}>{lang === 'en' ? "Welcome to the Reaction Speed Drill" : "مرحباً بك في تدريب سرعة رد الفعل"}</div>
+          <div style={{ fontSize: '11px', fontWeight: '500', opacity: 0.9, textTransform: 'none', letterSpacing: '0.5px', marginTop: '4px' }}>
+            {lang === 'en'
+              ? "Master your emotional response through our 3-step cognitive training module."
+              : "أتقن استجابتك العاطفية من خلال وحدة التدريب المعرفي المكونة من 3 خطوات."}
+          </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <div style={{ fontSize: '12px', color: '#666', fontWeight: 'bold' }}>L&D Series | 2026</div>
+          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontWeight: 'bold' }}>L&D Series | 2026</div>
           <button className="lang-toggle" onClick={() => setLang(l => l === 'en' ? 'ar' : 'en')}>
             {lang === 'en' ? "عربي" : "English"}
           </button>
         </div>
       </header>
 
-      {/* Progress Tracker */}
+      {/* Progress Tracker Vertical Sidebar */}
       <div className="progress-container">
         <div className="progress-tracker">
-          <div className="progress-bar" style={{ width: `${progressPercent}%` }}></div>
+          <div className="progress-bar" style={{ height: `${progressPercent}%` }}></div>
         </div>
         <div className="progress-text">
           {lang === 'en' ? `Modules Completed: ${completedCount} / 3` : `الوحدات المكتملة: ${completedCount} / 3`}
@@ -91,37 +139,62 @@ function App() {
       </div>
 
       {appPhase === 'dashboard' ? (
-        <div className="dashboard-container text-fade-in">
-          <div className="text-center">
-            <h1 style={{ color: 'var(--primary-color)' }}>
-               {lang === 'en' ? "Welcome to the Reaction Speed Drill" : "مرحباً بك في تدريب سرعة رد الفعل"}
-            </h1>
-            <p style={{ color: '#666', maxWidth: '600px', margin: '0 auto' }}>
-               {lang === 'en' 
-                 ? "Master your emotional response to critical feedback through our 3-step cognitive training module."
-                 : "أتقن استجابتك العاطفية للملاحظات النقدية من خلال وحدة التدريب المعرفي المكونة من 3 خطوات."}
-            </p>
-          </div>
-          
-          <div className="steps-grid">
-            {tabs.map((tab, index) => {
-              const Icon = tab.icon;
-              return (
-                <div key={index} className="step-card" onClick={() => startModule(index)}>
-                  <div>
-                    <div className="step-number">{index + 1}</div>
-                    <Icon style={{ fontSize: '48px', color: completedModules[index] ? 'var(--success-color)' : 'var(--primary-color)', marginBottom: '15px' }} />
-                    <h3 style={{ color: 'var(--primary-color)' }}>{tab.title}</h3>
-                    <p style={{ fontSize: '14px', color: '#666' }}>{tab.desc}</p>
+        <div className="dashboard-container text-fade-in" style={{ paddingTop: '20px' }}>
+          <div className="mission-map">
+            {/* Smooth Horizontal Organic Path SVG */}
+            <svg className="mission-path" viewBox="0 0 1000 400" fill="none" preserveAspectRatio="none">
+              <path
+                d="M100 230 C 300 100, 600 50, 900 250"
+                stroke="var(--secondary-color)"
+                strokeWidth="4"
+                strokeDasharray="15 15"
+                opacity="0.8"
+              />
+            </svg>
+
+            <div className="mission-grid">
+              {tabs.map((tab, index) => {
+                const tilts = ['-3deg', '4deg', '-2deg'];
+                const positions = [
+                  { left: '5%', top: '120px' },
+                  { left: '40%', top: '40px' },
+                  { left: '75%', top: '150px' }
+                ];
+
+                return (
+                  <div
+                    key={index}
+                    className={`mission-card-wrapper ${completedModules[index] ? 'completed' : ''}`}
+                    style={{
+                      position: 'absolute',
+                      ...positions[index],
+                      transform: `rotate(${tilts[index]})`,
+                      width: '220px'
+                    }}
+                    onClick={() => startModulePress(index)}
+                  >
+                    <div className="mission-polaroid">
+                      <div className="polaroid-image">
+                        <img
+                          src={tab.imageUrl}
+                          alt={tab.title}
+                        />
+                        {completedModules[index] && (
+                          <div className="mission-status-stamp">COMPLETED</div>
+                        )}
+                      </div>
+                      <div className="polaroid-content">
+                        <div className="mission-id">MISSION 0{index + 1}</div>
+                        <h3 className="mission-title">{tab.title}</h3>
+                        <p className="mission-desc">{tab.desc}</p>
+                      </div>
+
+                      <div className="pin-marker"></div>
+                    </div>
                   </div>
-                  <button className={`btn mt-3 ${completedModules[index] ? 'btn-secondary' : 'btn-accent'}`} style={{ width: '100%' }}>
-                    {completedModules[index] 
-                      ? (lang === 'en' ? "Review" : "مراجعة") 
-                      : (lang === 'en' ? "Start Step" : "ابدأ الخطوة")}
-                  </button>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       ) : (
@@ -129,15 +202,14 @@ function App() {
           {/* Navigation */}
           <nav className="nav-tabs">
             {tabs.map((tab, index) => {
-              const Icon = tab.icon;
               return (
-                <button 
-                  key={index} 
+                <button
+                  key={index}
                   className={`nav-tab ${activeTab === index ? 'active' : ''}`}
-                  onClick={() => setActiveTab(index)}
+                  onClick={() => startModulePress(index)}
                 >
-                  <Icon style={{ fontSize: '18px' }} />
-                  {tab.title} 
+                  <img src={tab.imageUrl} alt="" style={{ height: '24px', marginRight: lang === 'ar' ? '0' : '10px', marginLeft: lang === 'ar' ? '10px' : '0' }} />
+                  {tab.title}
                   {completedModules[index] && <FaRegCheckCircle style={{ color: 'var(--success-color)' }} />}
                 </button>
               );
@@ -146,9 +218,13 @@ function App() {
 
           {/* Main Content Area */}
           <main className="main-content">
-             <div className="module-container">
-               <ActiveComponent onComplete={() => handleModuleComplete(activeTab)} lang={lang} />
-             </div>
+            <div className="module-container">
+              <ActiveComponent 
+                key={activeTab} 
+                onComplete={() => handleModuleComplete(activeTab)} 
+                lang={lang} 
+              />
+            </div>
           </main>
         </>
       )}
@@ -165,6 +241,40 @@ function App() {
           <a href="#">{lang === 'en' ? "Contact HR" : "اتصل بالموارد البشرية"}</a>
         </div>
       </footer>
+
+      {/* Instruction Modal Overlay */}
+      {pendingModuleIndex !== null && (
+        <div className="modal-overlay text-fade-in" onClick={() => setPendingModuleIndex(null)}>
+          <div className="instruction-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-pills-container">
+              {instructions[pendingModuleIndex].pills.map((pill, i) => (
+                <div key={i} className={`modal-pill ${i === 1 ? 'modal-pill-active' : ''}`}>
+                  {pill}
+                  {i === 1 && <FaRegCheckCircle style={{ marginLeft: lang === 'ar' ? '0' : '8px', marginRight: lang === 'ar' ? '8px' : '0' }} />}
+                </div>
+              ))}
+            </div>
+
+            <div className="modal-label">{instructions[pendingModuleIndex].label}</div>
+
+            <h2 className="modal-title">{instructions[pendingModuleIndex].title}</h2>
+            <p className="modal-subtitle">{instructions[pendingModuleIndex].subtitle}</p>
+
+            <button className="modal-start-btn" onClick={() => confirmStartModule(pendingModuleIndex)}>
+              {lang === 'en' ? "ENTER MISSION" : "بـدء المهمـة"}
+            </button>
+
+            <div className="hand-indicator">
+              <FaHandPointer />
+            </div>
+
+            <div className="modal-footer-text">
+              {lang === 'en' ? "LINK ACTIVE IN 5S" : "الرابط نشط في 5 ثوانٍ"}
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
