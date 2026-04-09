@@ -13,28 +13,44 @@ const PREDEFINED_QUESTIONS_EN = [
   "I feel uncomfortable and judged.",
   "I immediately start defending myself.",
   "I try to explain why it's unfair.",
-  "I stay quiet but feel frustrated inside."
+  "I stay quiet but feel frustrated inside.",
+  "I feel like they are attacking my personality.",
+  "I want to prove that they are wrong.",
+  "I'm worried about my status in the team.",
+  "I find it hard to separate facts from feelings."
 ];
 
 const PREDEFINED_QUESTIONS_AR = [
   "أشعر بعدم الراحة وكأنني محكوم علي.",
   "أبدأ فوراً في الدفاع عن نفسي.",
   "أحاول شرح لماذا هذا غير عادل.",
-  "أبقى صامتاً ولكن أشعر بالإحباط من الداخل."
+  "أبقى صامتاً ولكن أشعر بالإحباط من الداخل.",
+  "أشعر وكأنهم يهاجمون شخصيتي.",
+  "أريد أن أثبت أنهم على خطأ.",
+  "أنا قلق بشأن مكانتي في الفريق.",
+  "أجد صعوبة في فصل الحقائق عن المشاعر."
 ];
 
 const PREDEFINED_RESPONSES_EN = {
   "I feel uncomfortable and judged.": "That's an honest start. This discomfort is your brain's threat-detection system identifying a shift in your social status. Why do you think your brain interprets 'Improvement' as 'Judgment' in that moment?",
   "I immediately start defending myself.": "Defending is a natural ego shield. It's the 'React' part of our chain. Before you spoke, what was the very first emotion you felt, and what story did your mind tell you about the person giving the feedback?",
   "I try to explain why it's unfair.": "Explaining is often just a sophisticated way of justifying. It's your brain trying to maintain its sense of competence. If you were to stop explaining for 10 seconds, what uncomfortable thought would rise to the surface?",
-  "I stay quiet but feel frustrated inside.": "Staying silent is a withdrawal reaction—an attempt to protect yourself by closing off. Inside that frustration, what specific word or phrase in the feedback triggered the feeling of unfairness?"
+  "I stay quiet but feel frustrated inside.": "Staying silent is a withdrawal reaction—an attempt to protect yourself by closing off. Inside that frustration, what specific word or phrase in the feedback triggered the feeling of unfairness?",
+  "I feel like they are attacking my personality.": "This is called 'Identity Infusion'—your brain blends the feedback with your self-worth. If we separate 'your behavior' from 'your value as a person,' how does that change the way you see the feedback?",
+  "I want to prove that they are wrong.": "The 'Need to be Right' is the strongest blocker of feedback agility. If you were only 10% responsible for the issue, what would that 10% be?",
+  "I'm worried about my status in the team.": "Neuroscience shows that social status is processed in the same area as physical survival. It's natural to feel fear. What is one thing you can say to show you value the feedback while maintaining your professional confidence?",
+  "I find it hard to separate facts from feelings.": "Feelings are real, but they aren't always true. If you were a neutral observer watching this feedback exchange from across the room, what three objective facts would you see?"
 };
 
 const PREDEFINED_RESPONSES_AR = {
   "أشعر بعدم الراحة وكأنني محكوم علي.": "هذه بداية صادقة. عدم الراحة هذا هو نظام كشف التهديدات في دماغك الذي يحدد تحولاً في وضعك الاجتماعي. لماذا تعتقد أن دماغك يفسر 'التحسين' على أنه 'حكم' في تلك اللحظة؟",
   "أبدأ فوراً في الدفاع عن نفسي.": "الدفاع هو درع طبيعي للأنا. إنه جزء 'رد الفعل' في سلسلتنا. قبل أن تتحدث، ما هي أول عاطفة شعرت بها، وما هي القصة التي رروها عقلك عن الشخص الذي قدم الملاحظات؟",
   "أحاول شرح لماذا هذا غير عادل.": "الشرح غالباً ما يكون مجرد وسيلة متطورة للتبرير. إنه دماغك يحاول الحفاظ على شعوره بالكفاءة. إذا توقفت عن الشرح لمدة 10 ثوانٍ، فما هي الفكرة غير المريحة التي ستطفو على السطح؟",
-  "أبقى صامتاً ولكن أشعر بالإحباط من الداخل.": "البقاء صامتاً هو رد فعل انسحابي - محاولة لحماية نفسك من خلال الانغلاق. داخل هذا الإحباط، ما هي الكلمة أو العبارة المحددة في الملاحظات التي أثارت الشعور بعدم العدالة؟"
+  "أبقى صامتاً ولكن أشعر بالإحباط من الداخل.": "البقاء صامتاً هو رد فعل انسحابي - محاولة لحماية نفسك من خلال الانغلاق. داخل هذا الإحباط، ما هي الكلمة أو العبارة المحددة في الملاحظات التي أثارت الشعور بعدم العدالة؟",
+  "أشعر وكأنهم يهاجمون شخصيتي.": "هذا يسمى 'اندماج الهوية' - يمزج دماغك بين الملاحظات وقيمتك الذاتية. إذا فصلنا 'سلوكك' عن 'قيمتك كشخص'، كيف يغير ذلك طريقة رؤيتك للملاحظات؟",
+  "أريد أن أثبت أنهم على خطأ.": "الحاجة إلى أن تكون 'على حق' هي أقوى عائق أمام رشاقة الملاحظات. إذا كنت مسؤولاً عن 10% فقط من المشكلة، فما هي تلك الـ 10%؟",
+  "أنا قلق بشأن مكانتي في الفريق.": "يظهر علم الأعصاب أن المكانة الاجتماعية تتم معالجتها في نفس منطقة النجاة الجسدية. من الطبيعي أن تشعر بالخوف. ما هو الشيء الوحيد الذي يمكنك قوله لإظهار أنك تقدر الملاحظات مع الحفاظ على ثقتك المهنية؟",
+  "أجد صعوبة في فصل الحقائق عن المشاعر.": "المشاعر حقيقية، لكنها ليست دائماً صحيحة. إذا كنت مراقباً محايداً يشاهد هذا التبادل من الطرف الآخر من الغرفة، فما هي الحقائق الثلاث الموضوعية التي ستراها؟"
 };
 
 const SUMMARY_RESPONSE_EN = "Key Learning: Feedback is difficult because of what happens inside us. Remember the pattern:\n> Feedback triggers Emotion\n> Emotion drives Thinking\n> Thinking drives Reaction\n\nTo move forward, focus on the 'Gap' between the emotion and the reaction.";
@@ -325,7 +341,7 @@ function AiChatbot({ onComplete = () => {}, lang = 'en', fullPage = false }) {
           </div>
 
           {/* Chat Messages */}
-          <div style={{ flex: 1, padding: '20px', overflowY: 'auto', backgroundColor: '#fafafa', display: 'flex', flexDirection: 'column', gap: '15px', direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
+          <div className="chat-window-content" style={{ flex: 1, padding: '20px', overflowY: 'auto', backgroundColor: '#fafafa', display: 'flex', flexDirection: 'column', gap: '15px', direction: lang === 'ar' ? 'rtl' : 'ltr' }}>
             {messages.map((msg, idx) => (
               <div key={idx} style={{ 
                 display: 'flex', 
@@ -462,6 +478,21 @@ function AiChatbot({ onComplete = () => {}, lang = 'en', fullPage = false }) {
             @keyframes slideUp {
               from { opacity: 0; transform: translateY(20px); }
               to { opacity: 1; transform: translateY(0); }
+            }
+            
+            /* Soft Custom Scrollbar */
+            .chat-window-content::-webkit-scrollbar {
+              width: 6px;
+            }
+            .chat-window-content::-webkit-scrollbar-track {
+              background: #f1f1f1;
+            }
+            .chat-window-content::-webkit-scrollbar-thumb {
+              background: #ccc;
+              border-radius: 10px;
+            }
+            .chat-window-content::-webkit-scrollbar-thumb:hover {
+              background: var(--secondary-color);
             }
           `}} />
         </div>
