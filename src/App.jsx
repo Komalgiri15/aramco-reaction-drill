@@ -10,6 +10,7 @@ import initialVideo from './assets/video.mp4';
 import card1Gif from './assets/card1.gif';
 import card2Gif from './assets/Card2.gif';
 import card3Gif from './assets/card3.gif';
+import aramcoLogo from './assets/aramco-1.svg';
 
 function App() {
   const [appPhase, setAppPhase] = useState('video'); // 'video', 'dashboard', 'module'
@@ -46,6 +47,14 @@ function App() {
     const updated = [...completedModules];
     updated[index] = true;
     setCompletedModules(updated);
+
+    // Auto-initialize the next mission
+    if (index < tabs.length - 1) {
+      setActiveTab(index + 1);
+      // We stay in 'module' phase, but changing activeTab will swap the component thanks to the 'key'
+    } else {
+      setAppPhase('dashboard');
+    }
   };
 
   const [pendingModuleIndex, setPendingModuleIndex] = useState(null);
@@ -108,9 +117,9 @@ function App() {
       <header className="app-header">
         <div className="logo-area" style={{ cursor: 'pointer' }} onClick={() => setAppPhase('dashboard')}>
           <div className="logo-arca">
-            <img src="/src/assets/aramco-1.svg" alt="Aramco" style={{ height: '35px', marginRight: '10px' }} />
+            <img src={aramcoLogo} alt="Aramco" style={{ height: '35px', marginRight: '10px' }} />
           </div>
-          <div className="logo-subtitle">ARAMCO INDIA | LEARNING & DEVELOPMENT</div>
+          <div className="logo-subtitle">ARAMCO | LEARNING & DEVELOPMENT</div>
         </div>
         <div className="header-title">
           <div style={{ fontSize: '20px', fontWeight: '800' }}>{lang === 'en' ? "Welcome to the Reaction Speed Drill" : "مرحباً بك في تدريب سرعة رد الفعل"}</div>
@@ -233,13 +242,8 @@ function App() {
       <AiChatbot lang={lang} />
 
       {/* Footer */}
-      <footer className="app-footer">
-        <div>© 2026 Aramco Asia India Pvt. Ltd. | Learning & Development Division</div>
-        <div className="footer-links">
-          <a href="#">{lang === 'en' ? "Privacy" : "الخصوصية"}</a>
-          <a href="#">{lang === 'en' ? "Terms" : "الشروط"}</a>
-          <a href="#">{lang === 'en' ? "Contact HR" : "اتصل بالموارد البشرية"}</a>
-        </div>
+      <footer className="app-footer" style={{ justifyContent: 'center' }}>
+        <div>© 2026 Aramco | Learning & Development Division</div>
       </footer>
 
       {/* Instruction Modal Overlay */}
