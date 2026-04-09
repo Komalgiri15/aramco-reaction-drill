@@ -330,22 +330,38 @@ function AiChatbot({ onComplete = () => {}, lang = 'en', fullPage = false }) {
               <div key={idx} style={{ 
                 display: 'flex', 
                 justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                animation: 'slideIn 0.3s ease-out'
+                animation: 'slideIn 0.3s ease-out',
+                marginBottom: '20px'
               }}>
                 <div style={{
                   maxWidth: '85%',
-                  padding: '12px 18px',
-                  borderRadius: '12px',
-                  lineHeight: '1.5',
+                  padding: '14px 18px',
+                  borderRadius: '16px',
+                  lineHeight: '1.6',
                   fontSize: '14px',
-                  backgroundColor: msg.role === 'user' ? 'white' : '#f0f0f0',
                   color: '#1a1a1a',
-                  border: msg.role === 'user' ? '2px solid #39A646' : '1px solid #ddd',
-                  borderBottomRightRadius: msg.role === 'user' && lang === 'en' ? '2px' : '12px',
-                  borderBottomLeftRadius: msg.role === 'assistant' && lang === 'en' ? '2px' : '12px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                  border: msg.role === 'user' ? '1.5px solid #39A646' : '1px solid #eee',
+                  background: msg.role === 'user' 
+                    ? 'white' 
+                    : 'linear-gradient(to bottom, #ffffff, #f9f9f9)',
+                  borderBottomRightRadius: msg.role === 'user' && lang === 'en' ? '2px' : '16px',
+                  borderBottomLeftRadius: msg.role === 'assistant' && lang === 'en' ? '2px' : '16px',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                  backdropFilter: 'blur(10px)',
+                  position: 'relative'
                 }}>
                   {msg.content}
+                  <div style={{ 
+                    position: 'absolute', 
+                    bottom: '-18px', 
+                    [msg.role === 'user' ? 'right' : 'left']: '5px', 
+                    fontSize: '9px', 
+                    color: '#aaa', 
+                    fontWeight: '800',
+                    letterSpacing: '0.5px'
+                  }}>
+                    {msg.role === 'user' ? (lang === 'en' ? 'YOU' : 'أنت') : 'ARIA'}
+                  </div>
                 </div>
               </div>
             ))}

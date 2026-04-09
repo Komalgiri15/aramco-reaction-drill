@@ -48,10 +48,9 @@ function App() {
     updated[index] = true;
     setCompletedModules(updated);
 
-    // Auto-initialize the next mission
+    // Auto-initialize the next mission modal
     if (index < tabs.length - 1) {
-      setActiveTab(index + 1);
-      // We stay in 'module' phase, but changing activeTab will swap the component thanks to the 'key'
+      setPendingModuleIndex(index + 1);
     } else {
       setAppPhase('dashboard');
     }
